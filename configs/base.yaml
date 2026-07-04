@@ -1,0 +1,6 @@
+seed: 42
+n_trials: 80
+n_splits: 5
+data_dir: data/raw
+feature_csv: data/processed/adni_features.csv
+results_dir: results
