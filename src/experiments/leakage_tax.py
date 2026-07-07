@@ -211,20 +211,20 @@ def run(feature_csv: Path, results_dir: Path, seed: int = SEED) -> pd.DataFrame:
     df = pd.read_csv(feature_csv)
     df = df[df["label_36mo"].notna()].reset_index(drop=True)
     feat_cols = get_feature_cols(df)
-    X = df[feat_cols]
+    # Carry RID inside X so training-partition groups can be recovered from the
+    # (reset-index) split frames rather than the original df, which would give a
+    # positional, non-stratified split.
+    X = df[feat_cols + ["RID"]]
     y = df["label_36mo"].astype(int)
     rids = df["RID"]
 
     # One fixed subject-level split — all variants use the same hold-out
     X_train, X_test, y_train, y_test = subject_split(X, y, rids, seed=seed)
-    train_rids_mask = rids.isin(set(rids) - set(df.loc[~df.index.isin(X_train.index), "RID"]))
-    df_train = df[train_rids_mask].reset_index(drop=True)
-    df_test = df[~train_rids_mask].reset_index(drop=True)
-    rids_train = df_train["RID"]
-    X_train = df_train[feat_cols]
-    y_train = df_train["label_36mo"].astype(int)
-    X_test = df_test[feat_cols]
-    y_test = df_test["label_36mo"].astype(int)
+    rids_train = X_train["RID"].reset_index(drop=True)
+    X_train = X_train[feat_cols].reset_index(drop=True)
+    X_test = X_test[feat_cols].reset_index(drop=True)
+    y_train = y_train.reset_index(drop=True)
+    y_test = y_test.reset_index(drop=True)
 
     print("=" * 60)
     print("LEAKAGE-TAX ABLATION")

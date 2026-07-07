@@ -139,32 +139,20 @@ def train(
     df = df[df["label_36mo"].notna()].reset_index(drop=True)
 
     feat_cols = get_feature_cols(df)
-    X = df[feat_cols]
+    # Carry RID inside X so the training-partition groups can be recovered
+    # after the split. subject_split returns reset-index frames, so we must
+    # read RID from the returned frame itself rather than the original df
+    # (mixing the two silently produces a positional, non-stratified split).
+    X = df[feat_cols + ["RID"]]
     y = df["label_36mo"].astype(int)
     rids = df["RID"]
 
-    X_train_df, X_test_df, y_train, y_test = subject_split(X, y, rids, seed=seed)
-    rids_train = rids[rids.isin(
-        set(rids) - set(rids[~rids.isin(X_train_df.index)])  # same partition
-    )].reset_index(drop=True)
-
-    # Rebuild rids_train aligned with the split
-    train_mask = rids.isin(set(rids.unique()) - set(
-        rids[~y.index.isin(y_train.index)]
-    ))
-
-    # Simpler: attach RID back to the split DataFrames before stripping it
-    df_train = df[df["RID"].isin(set(rids) - set(
-        df.loc[~df.index.isin(X_train_df.index), "RID"]
-    ))].reset_index(drop=True)
-
-    rids_train_s = df_train["RID"]
-    X_train_feat = df_train[feat_cols]
-    y_train_s = df_train["label_36mo"].astype(int)
-
-    df_test = df[~df["RID"].isin(set(df_train["RID"]))].reset_index(drop=True)
-    X_test_feat = df_test[feat_cols]
-    y_test_s = df_test["label_36mo"].astype(int)
+    X_train_df, X_test_df, y_train_s, y_test_s = subject_split(X, y, rids, seed=seed)
+    rids_train_s = X_train_df["RID"].reset_index(drop=True)
+    X_train_feat = X_train_df[feat_cols].reset_index(drop=True)
+    X_test_feat = X_test_df[feat_cols].reset_index(drop=True)
+    y_train_s = y_train_s.reset_index(drop=True)
+    y_test_s = y_test_s.reset_index(drop=True)
 
     print(f"Train: {len(y_train_s)} | Test: {len(y_test_s)}")
 

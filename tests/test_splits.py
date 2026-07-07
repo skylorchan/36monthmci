@@ -131,3 +131,52 @@ def test_cv_covers_all_train_rows(synthetic_data):
         val_idx_all.extend(val_idx.tolist())
 
     assert sorted(val_idx_all) == list(range(len(y_tr))), "CV does not cover all training rows"
+
+
+# ---------------------------------------------------------------------------
+# Regression guards for the corrected split-reconstruction usage.
+#
+# The pipeline carries RID inside X so that training-partition groups are read
+# back from the (reset-index) split frames rather than the original dataframe.
+# An earlier version mixed reset-index positions with original indices, which
+# silently produced a positional, non-stratified hold-out set. These tests
+# assert the split is subject-disjoint, stratified, and deterministic.
+# ---------------------------------------------------------------------------
+
+def test_rid_carried_split_is_disjoint(synthetic_data):
+    """When RID travels inside X, train/test RID sets must be disjoint and complete."""
+    X, y, rids = synthetic_data
+    X_rid = X.copy()
+    X_rid["RID"] = rids.values
+    X_train, X_test, _, _ = subject_split(X_rid, y, rids, seed=42)
+
+    train_rids = set(X_train["RID"])
+    test_rids = set(X_test["RID"])
+    assert train_rids.isdisjoint(test_rids), "RID overlap between train and test!"
+    assert train_rids | test_rids == set(rids), "Some RIDs lost in the split!"
+
+
+def test_split_is_stratified(synthetic_data):
+    """Test-set conversion prevalence must track the cohort prevalence."""
+    X, y, rids = synthetic_data
+    cohort_prev = float(y.mean())
+    _, _, _, y_test = subject_split(X, y, rids, seed=42)
+    test_prev = float(y_test.mean())
+    # Stratified split should stay within ~10 percentage points on n≈61.
+    assert abs(test_prev - cohort_prev) < 0.10, (
+        f"Split not stratified: cohort {cohort_prev:.2f} vs test {test_prev:.2f}"
+    )
+
+
+def test_split_is_deterministic(synthetic_data):
+    """Same seed reproduces the split exactly; different seeds differ."""
+    X, y, rids = synthetic_data
+    X_rid = X.copy()
+    X_rid["RID"] = rids.values
+
+    a = subject_split(X_rid, y, rids, seed=42)[1]["RID"]
+    b = subject_split(X_rid, y, rids, seed=42)[1]["RID"]
+    c = subject_split(X_rid, y, rids, seed=7)[1]["RID"]
+
+    assert set(a) == set(b), "Same seed produced different test sets"
+    assert set(a) != set(c), "Different seeds produced identical test sets"
