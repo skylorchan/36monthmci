@@ -70,10 +70,8 @@ function figCaption(text) {
 const titleBlock = [
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 240, after: 160 },
     children: [new TextRun({ text: "Leakage-Audited Multimodal Prediction of Mild Cognitive Impairment to Alzheimer’s Disease Conversion: An Honest Benchmark on ADNI", bold: true, size: 34, font: "Times New Roman" })] }),
-  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 60 },
-    children: [new TextRun({ text: "Skylor Chan", size: 26, font: "Times New Roman" })] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 240 },
-    children: [new TextRun({ text: "Target venue: Journal of Engineering Innovation (JEI) / medRxiv preprint", size: 20, font: "Times New Roman", italics: true })] }),
+    children: [new TextRun({ text: "Skylor Chan", size: 26, font: "Times New Roman" })] }),
 ];
 
 // ---------------------------------------------------------------------------
@@ -372,7 +370,7 @@ const discussionBlock = [
   body("The modest overall sample size is a further limitation. With 308 subjects and only 61 in each held-out test set, confidence intervals are wide (roughly 0.16 AUC), statistical power for detecting small effects is limited, and well-powered subgroup analyses are not possible; this is precisely why performance is reported as a distribution over 200 splits rather than a single value. Additional limitations are that the analysis uses a single cohort (ADNI), limiting generalisability; that no tau PET features are included; and that the APOEε4 allele count is derived from raw genotype strings rather than a curated field."),
 
   h2("4.2 Future Directions"),
-  body("The most principled correction for censoring bias is a time-to-event framing using survival models (for example, random survival forests or gradient-boosted survival models), which recover information from censored subjects and report time-dependent AUC at 12, 24, and 36 months; this would recover all 417 subjects and eliminate the selection bias. External validation on an independent cohort such as the Open Access Series of Imaging Studies (OASIS-3) would provide the strongest evidence of generalisability and is a planned extension. Finally, the inclusion of tau PET, available in later ADNI phases but not yet incorporated here, may add discriminative signal beyond amyloid, as tau burden more directly reflects neurodegeneration."),
+  body("The most principled correction for censoring bias is a time-to-event framing using survival models (for example, random survival forests or gradient-boosted survival models), which recover information from censored subjects and report time-dependent AUC at 12, 24, and 36 months; this would recover all 417 subjects and eliminate the selection bias. External validation on an independent cohort such as the Open Access Series of Imaging Studies (OASIS-3) [13] would provide the strongest evidence of generalisability and is a planned extension. Finally, the inclusion of tau PET, available in later ADNI phases but not yet incorporated here, may add discriminative signal beyond amyloid, as tau burden more directly reflects neurodegeneration."),
 
   h1("5. Conclusion"),
   body("We present a leakage-audited, reproducible pipeline for 36-month MCI-to-AD conversion prediction that achieves an honest test AUC of 0.862 (95% range 0.785–0.942 across 200 subject-level splits) on ADNI. The primary contribution is not the AUC; it is the demonstration that standard but incorrect practices inflate cross-validation AUC by up to 0.159 on this dataset, together with a fully reproducible artifact that others can use as a leakage-free baseline. The finding that cognitive assessments alone approach full-modality performance has practical implications for clinical risk stratification in settings where PET and CSF are unavailable. We hope this work contributes to a higher standard of methodological transparency in machine-learning-based neuroimaging research."),
@@ -395,6 +393,7 @@ const referencesBlock = [
   body("[10] Chen T, Guestrin C. XGBoost: a scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining. 2016:785–794."),
   body("[11] Lundberg SM, Lee SI. A unified approach to interpreting model predictions. Advances in Neural Information Processing Systems. 2017;30:4765–4774."),
   body("[12] Vickers AJ, Elkin EB. Decision curve analysis: a novel method for evaluating prediction models. Medical Decision Making. 2006;26(6):565–574."),
+  body("[13] LaMontagne PJ, Benzinger TLS, Morris JC, et al. OASIS-3: longitudinal neuroimaging, clinical, and cognitive dataset for normal aging and Alzheimer disease. medRxiv. 2019. doi:10.1101/2019.12.13.19014902"),
 ];
 
 // ---------------------------------------------------------------------------
